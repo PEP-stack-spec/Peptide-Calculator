@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Peptide Lab | Pro Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background: #020617; 
+            color: #f8fafc; 
+            font-family: 'Inter', sans-serif;
+        }
+        .header-font { font-family: 'Orbitron', sans-serif; }
+        .glass { 
+            background: rgba(30, 41, 59, 0.5); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255,255,255,0.1); 
+        }
+        .teal-glow { box-shadow: 0 0 20px rgba(45, 212, 191, 0.2); }
+        input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+        
+        /* Syringe Animation */
+        #liquid { transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-md mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="header-font text-2xl text-teal-400 tracking-widest uppercase">The Peptide Lab</h1>
+            <p class="text-slate-400 text-sm mt-1">Research Reconstitution Protocol</p>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <button onclick="setPreset(5, 250, 2)" class="glass px-3 py-2 rounded-lg text-xs hover:bg-teal-500/20 whitespace-nowrap">5mg (Tirz)</button>
+            <button onclick="setPreset(10, 500, 2)" class="glass px-3 py-2 rounded-lg text-xs hover:bg-teal-500/20 whitespace-nowrap">10mg (Sema)</button>
+            <button onclick="setPreset(2, 200, 1)" class="glass px-3 py-2 rounded-lg text-xs hover:bg-teal-500/20 whitespace-nowrap">2mg (BPC)</button>
+        </div>
+
+        <!-- Main Card -->
+        <div class="glass rounded-3xl p-6 teal-glow">
+            
+            <div class="space-y-4">
+                <!-- Vial Size -->
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 ml-1">Vial Size (mg)</label>
+                    <input type="number" id="vialSize" oninput="calc()" placeholder="5" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 focus:border-teal-400 outline-none transition">
+                </div>
+
+                <!-- Water -->
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 ml-1">BAC Water (ml)</label>
+                    <input type="number" id="waterMl" oninput="calc()" placeholder="2" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 focus:border-teal-400 outline-none transition">
+                </div>
+
+                <!-- Dose -->
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 ml-1">Desired Dose (mcg)</label>
+                    <input type="number" id="doseMcg" oninput="calc()" placeholder="250" class="w-full bg-slate-900/50 border border-slate-700 rounded-xl p-3 focus:border-teal-400 outline-none transition">
+                </div>
+            </div>
+
+            <!-- Syringe Visual -->
+            <div class="mt-8 mb-4">
+                <div class="flex justify-between text-[10px] text-slate-500 mb-1 px-1 italic">
+                    <span>0u</span><span>25u</span><span>50u</span><span>75u</span><span>100u</span>
+                </div>
+                <div class="relative h-8 bg-slate-800 rounded-md border-2 border-slate-600 overflow-hidden">
+                    <!-- Marks -->
+                    <div class="absolute inset-0 flex justify-between px-1 pointer-events-none">
+                        <div class="w-[1px] h-full bg-slate-700"></div><div class="w-[1px] h-full bg-slate-700"></div>
+                        <div class="w-[1px] h-full bg-slate-700"></div><div class="w-[1px] h-full bg-slate-700"></div>
+                        <div class="w-[1px] h-full bg-slate-700"></div><div class="w-[1px] h-full bg-slate-700"></div>
+                        <div class="w-[1px] h-full bg-slate-700"></div><div class="w-[1px] h-full bg-slate-700"></div>
+                        <div class="w-[1px] h-full bg-slate-700"></div><div class="w-[1px] h-full bg-slate-700"></div>
+                    </div>
+                    <!-- The Fill -->
+                    <div id="liquid" class="h-full bg-gradient-to-r from-teal-600 to-teal-300 shadow-[0_0_15px_rgba(45,212,191,0.5)]" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="bg-slate-900/80 rounded-2xl p-4 text-center border border-teal-500/30">
+                    <div class="text-[10px] text-slate-400 uppercase tracking-tighter">Your Dose</div>
+                    <div class="text-3xl font-bold text-teal-400"><span id="units">0</span><span class="text-xs ml-1">units</span></div>
+                </div>
+                <div class="bg-slate-900/80 rounded-2xl p-4 text-center border border-slate-700">
+                    <div class="text-[10px] text-slate-400 uppercase tracking-tighter">Vial Yield</div>
+                    <div class="text-3xl font-bold text-white"><span id="yield">0</span><span class="text-xs ml-1">doses</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Protocol Summary -->
+        <div id="protocol" class="mt-6 p-4 rounded-2xl bg-teal-950/20 border border-teal-900/50 hidden">
+            <h3 class="text-teal-400 text-xs font-bold uppercase mb-2">Protocol Summary</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" id="protocolText"></p>
+        </div>
+
+        <!-- CTA Buttons -->
+        <div class="mt-8 space-y-3">
+            <a href="YOUR_AFFILIATE_LINK_1" class="block w-full py-4 bg-teal-500 hover:bg-teal-400 text-slate-950 text-center font-bold rounded-xl transition shadow-lg teal-glow">
+                GET LAB-GRADE BAC WATER
+            </a>
+            <a href="YOUR_AFFILIATE_LINK_2" class="block w-full py-4 bg-slate-800 hover:bg-slate-700 text-teal-400 text-center font-bold rounded-xl border border-slate-600 transition">
+                SOURCE RESEARCH PEPTIDES
+            </a>
+        </div>
+
+        <!-- Warning -->
+        <p class="mt-8 text-[10px] text-slate-500 text-center leading-relaxed">
+            <strong>STRICTLY FOR LABORATORY RESEARCH PURPOSES ONLY.</strong><br>
+            Not for human or animal consumption. Reconstitution calculations are for theoretical research planning.
+        </p>
+    </div>
+
+    <script>
+        function calc() {
+            const mg = parseFloat(document.getElementById('vialSize').value);
+            const water = parseFloat(document.getElementById('waterMl').value);
+            const dose = parseFloat(document.getElementById('doseMcg').value);
+
+            if (mg && water && dose) {
+                const concentration = (mg * 1000) / water;
+                const units = (dose / concentration) * 100;
+                const dosesPerVial = (mg * 1000) / dose;
+
+                // Update UI
+                document.getElementById('units').innerText = units.toFixed(1);
+                document.getElementById('yield').innerText = Math.floor(dosesPerVial);
+                document.getElementById('liquid').style.width = Math.min(units, 100) + '%';
+                
+                // Show Protocol
+                document.getElementById('protocol').classList.remove('hidden');
+                document.getElementById('protocolText').innerHTML = `To achieve a <b>${dose}mcg</b> dose from a <b>${mg}mg</b> vial, add <b>${water}ml</b> of BAC water. Draw the research solution to the <b>${units.toFixed(1)} unit</b> mark on a U-100 syringe. Each vial will provide <b>${Math.floor(dosesPerVial)}</b> full doses.`;
+            }
+        }
+
+        function setPreset(mg, dose, water) {
+            document.getElementById('vialSize').value = mg;
+            document.getElementById('doseMcg').value = dose;
+            document.getElementById('waterMl').value = water;
+            calc();
+        }
+    </script>
+</body>
+</html>
